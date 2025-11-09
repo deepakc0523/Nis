@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced AES Encryption Suite</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script defer src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #000; color: #fff; overflow-x: hidden; }
+    .bg-animated { background:
+      radial-gradient(circle at 20% 50%, rgba(59,130,246,.15), transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(168,85,247,.15), transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(34,197,94,.1), transparent 50%),
+      linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); min-height: 100vh; }
+    .glass { background: rgba(255,255,255,.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 8px 32px rgba(0,0,0,.37); }
+    .glass-strong { background: rgba(255,255,255,.06); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,.12); }
+    .neon-blue { box-shadow: 0 0 20px rgba(59,130,246,.4), 0 0 40px rgba(59,130,246,.2); border: 1px solid rgba(59,130,246,.5); }
+    .neon-green { box-shadow: 0 0 20px rgba(34,197,94,.4), 0 0 40px rgba(34,197,94,.2); border: 1px solid rgba(34,197,94,.5); }
+    .neon-purple { box-shadow: 0 0 20px rgba(168,85,247,.4), 0 0 40px rgba(168,85,247,.2); border: 1px solid rgba(168,85,247,.5); }
+    .btn-hover { transition: all .3s cubic-bezier(.4,0,.2,1); position: relative; overflow: hidden; }
+    .btn-hover::before { content:''; position:absolute; top:50%; left:50%; width:0; height:0; border-radius:50%; background: rgba(255,255,255,.1); transform: translate(-50%,-50%); transition: width .6s, height .6s; }
+    .btn-hover:hover::before { width:400px; height:400px; }
+    .btn-hover:hover { transform: translateY(-3px); }
+    .btn-hover:active { transform: translateY(-1px); }
+    .dropzone { border: 2px dashed rgba(255,255,255,.15); transition: all .4s cubic-bezier(.4,0,.2,1); cursor: pointer; }
+    .dropzone:hover { border-color: rgba(59,130,246,.5); background: rgba(59,130,246,.03); transform: scale(1.01); }
+    .dropzone.dragover { border-color: rgba(59,130,246,.8); background: rgba(59,130,246,.08); transform: scale(1.02); box-shadow: 0 0 30px rgba(59,130,246,.3); }
+    .progress-bar { background: linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899,#3b82f6); background-size: 200% 100%; animation: progressShimmer 2s linear infinite; box-shadow: 0 0 20px rgba(59,130,246,.5); }
+    @keyframes progressShimmer { 0%{background-position:0 0} 100%{background-position:200% 0} }
+    .strength-indicator{ transition: all .4s ease; border-radius:9999px; height:6px; }
+    .strength-0{ width:20%; background:linear-gradient(90deg,#ef4444,#dc2626) }
+    .strength-1{ width:40%; background:linear-gradient(90deg,#f59e0b,#d97706) }
+    .strength-2{ width:60%; background:linear-gradient(90deg,#eab308,#ca8a04) }
+    .strength-3{ width:80%; background:linear-gradient(90deg,#84cc16,#65a30d) }
+    .strength-4{ width:100%; background:linear-gradient(90deg,#22c55e,#16a34a) }
+    .spin{ animation: spin 1s linear infinite } @keyframes spin{ to{ transform: rotate(360deg) } }
+    .fade-in{ animation: fadeIn .6s ease-out } @keyframes fadeIn{ from{ opacity:0; transform: translateY(30px) } to{ opacity:1; transform: translateY(0) } }
+    .pulse{ animation: pulse 2s cubic-bezier(.4,0,.6,1) infinite } @keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.6} }
+    .slide-in-right{ animation: slideInRight .5s ease-out } @keyframes slideInRight{ from{ transform: translateX(100%); opacity:0 } to{ transform: translateX(0); opacity:1 } }
+    .tab{ transition: all .3s ease; position: relative; }
+    .tab.active { background: linear-gradient(135deg, rgba(59,130,246,.2), rgba(168,85,247,.2)); border-color: rgba(59,130,246,.5); }
+    .tab.active::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px; background: linear-gradient(90deg,#3b82f6,#8b5cf6); }
+    ::-webkit-scrollbar { width:8px; height:8px } ::-webkit-scrollbar-track{ background: rgba(255,255,255,.03) } ::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.15); border-radius:4px } ::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,.25) }
+    .toast{ animation: toastSlide .4s ease-out } @keyframes toastSlide{ from{ transform: translateX(400px); opacity:0 } to{ transform: translateX(0); opacity:1 } }
+    input:focus, textarea:focus{ outline:none; border-color: rgba(59,130,246,.5); box-shadow: 0 0 0 3px rgba(59,130,246,.1) }
+    .entropy-dot{ width:4px; height:4px; border-radius:50%; display:inline-block; margin:0 1px; transition: all .3s ease }
+    .security-badge{ animation: badgePulse 3s ease-in-out infinite } @keyframes badgePulse{ 0%,100%{ transform: scale(1) } 50%{ transform: scale(1.05) } }
+    .modal-backdrop{ backdrop-filter: blur(10px); background: rgba(0,0,0,.7) }
+  </style>
+</head>
+<body class="bg-animated">
+  <div class="relative z-10">
+    <header class="max-w-7xl mx-auto px-6 pt-8 pb-6">
+      <div class="flex items-center justify-between flex-wrap gap-4">
+        <div class="flex items-center gap-4">
+          <div class="relative group">
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl blur-lg opacity-60 group-hover:opacity-100 transition"></div>
+            <div class="relative h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-600 to-pink-500 flex items-center justify-center">
+              <i data-lucide="shield-check" class="w-8 h-8 text-white"></i>
+            </div>
+          </div>
+          <div>
+            <h1 class="text-3xl md:text-4xl font-black tracking-tight bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              AES-256 Encryption Pro
+            </h1>
+            <p class="text-sm text-gray-400 mt-1">Military-grade AES-GCM • Zero-knowledge • Client-side only</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="glass px-4 py-2 rounded-xl flex items-center gap-2 security-badge">
+            <div class="h-2 w-2 rounded-full bg-green-400 pulse"></div>
+            <span class="text-xs text-gray-400">100% Secure</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 pb-24">
+      <div class="glass rounded-2xl p-2 mb-6 fade-in">
+        <div class="grid grid-cols-2 gap-2">
+          <button id="tab-encrypt" class="tab active btn-hover rounded-xl py-4 font-bold border border-transparent">
+            <div class="flex items-center justify-center gap-2">
+              <i data-lucide="lock" class="w-5 h-5"></i>
+              <span>Encrypt</span>
+            </div>
+          </button>
+          <button id="tab-decrypt" class="tab btn-hover rounded-xl py-4 font-bold border border-transparent">
+            <div class="flex items-center justify-center gap-2">
+              <i data-lucide="unlock" class="w-5 h-5"></i>
+              <span>Decrypt</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Encrypt Panel -->
+      <section id="panel-encrypt" class="fade-in">
+        <div class="grid lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 space-y-6">
+            <div class="glass-strong rounded-3xl p-8">
+              <h2 class="text-2xl font-bold mb-2 flex items-center gap-2">
+                <i data-lucide="file-lock" class="w-6 h-6 text-blue-400"></i>
+                Encrypt Your File
+              </h2>
+              <p class="text-sm text-gray-400 mb-6">Advanced AES-256-GCM with authenticated encryption and optional GZIP compression</p>
+
+              <div id="enc-drop" class="dropzone rounded-2xl p-12 text-center mb-6">
+                <i data-lucide="upload-cloud" class="w-16 h-16 mx-auto mb-4 text-gray-400"></i>
+                <p class="text-xl font-bold mb-2">Drop your file here</p>
+                <p class="text-sm text-gray-400 mb-4">or click to browse</p>
+                <div class="flex items-center justify-center gap-2 flex-wrap">
+                  <span class="px-3 py-1 rounded-full bg-white/5 text-xs">Any file type</span>
+                  <span class="px-3 py-1 rounded-full bg-white/5 text-xs">Max 500MB</span>
+                  <span class="px-3 py-1 rounded-full bg-white/5 text-xs">100% Private</span>
+                </div>
+                <input id="enc-file" type="file" class="hidden">
+              </div>
+
+              <div id="enc-file-info" class="hidden glass rounded-xl p-4 mb-6 slide-in-right">
+                <div class="flex items-center gap-4">
+                  <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="file" class="w-6 h-6 text-white"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-bold truncate" id="enc-file-name">document.pdf</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-400 mt-1">
+                      <span id="enc-file-size">0 KB</span>
+                      <span>•</span>
+                      <span id="enc-file-type">PDF</span>
+                    </div>
+                  </div>
+                  <button id="enc-remove-file" class="text-gray-400 hover:text-red-400 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="space-y-4 mb-6">
+                <div>
+                  <label class="text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
+                    <i data-lucide="key" class="w-4 h-4 text-blue-400"></i>
+                    Master Password
+                  </label>
+                  <div class="relative">
+                    <input id="enc-pass" type="password" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 pr-12 text-lg transition" placeholder="Create a strong password" />
+                    <button id="enc-toggle-pass" type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition">
+                      <i data-lucide="eye" class="w-5 h-5"></i>
+                    </button>
+                  </div>
+
+                  <div class="mt-3">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-xs font-semibold text-gray-400">Password Strength</span>
+                      <span id="enc-strength-text" class="text-xs font-bold text-red-400">Very Weak</span>
+                    </div>
+                    <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div id="enc-strength-bar" class="strength-indicator strength-0"></div>
+                    </div>
+                    <div id="enc-strength-details" class="mt-2 text-xs text-gray-400 space-y-1">
+                      <div class="flex items-center gap-2"><i data-lucide="x" class="w-3 h-3 text-red-400" id="length-check"></i><span>At least 12 characters</span></div>
+                      <div class="flex items-center gap-2"><i data-lucide="x" class="w-3 h-3 text-red-400" id="upper-check"></i><span>Uppercase & lowercase letters</span></div>
+                      <div class="flex items-center gap-2"><i data-lucide="x" class="w-3 h-3 text-red-400" id="number-check"></i><span>Numbers</span></div>
+                      <div class="flex items-center gap-2"><i data-lucide="x" class="w-3 h-3 text-red-400" id="special-check"></i><span>Special characters (!@#$%^&*)</span></div>
+                    </div>
+                  </div>
+
+                  <div class="mt-3 glass rounded-lg p-3">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-xs font-semibold text-gray-400">Entropy Score</span>
+                      <span id="entropy-score" class="text-xs font-bold text-purple-400">0 bits</span>
+                    </div>
+                    <div id="entropy-visual" class="flex gap-1 flex-wrap"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
+                    <i data-lucide="check-circle" class="w-4 h-4 text-green-400"></i>
+                    Confirm Password
+                  </label>
+                  <input id="enc-pass-confirm" type="password" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-lg transition" placeholder="Re-enter your password" />
+                  <p id="enc-match-indicator" class="text-xs mt-2 hidden"></p>
+                </div>
+              </div>
+
+              <div class="glass rounded-xl p-5 mb-6">
+                <h3 class="text-sm font-bold mb-4 flex items-center gap-2"><i data-lucide="settings" class="w-4 h-4 text-purple-400"></i>Advanced Security Options</h3>
+                <div class="space-y-4">
+                  <div>
+                    <div class="flex items-center justify-between mb-2">
+                      <label class="text-xs font-semibold text-gray-400">PBKDF2 Iterations</label>
+                      <span id="enc-iters-display" class="text-xs font-bold text-blue-400">310,000</span>
+                    </div>
+                    <input id="enc-iters" type="range" min="120000" max="1000000" step="10000" value="310000" class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-blue-500" />
+                    <div class="flex justify-between text-[10px] text-gray-500 mt-1"><span>Fast</span><span>Balanced</span><span>Maximum Security</span></div>
+                    <p class="text-xs text-gray-500 mt-2">Higher values = slower but more secure against brute-force attacks</p>
+                  </div>
+
+                  <div class="grid md:grid-cols-2 gap-3 pt-3 border-t border-white/10">
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-white/5 transition">
+                      <input type="checkbox" id="enc-compress" checked class="accent-blue-500 w-4 h-4" />
+                      <div>
+                        <div class="text-sm font-semibold">GZIP Compression</div>
+                        <div class="text-xs text-gray-500">Reduce file size before encryption</div>
+                      </div>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-white/5 transition">
+                      <input type="checkbox" id="enc-metadata" class="accent-purple-500 w-4 h-4" />
+                      <div>
+                        <div class="text-sm font-semibold">Embed Metadata</div>
+                        <div class="text-xs text-gray-500">Store original filename & type</div>
+                      </div>
+                    </label>
+                  </div>
+
+                  <div class="pt-3 border-t border-white/10">
+                    <label class="flex items-start gap-3 cursor-pointer p-2 rounded-lg hover:bg-white/5 transition">
+                      <input type="checkbox" id="enc-use-keyfile" class="accent-orange-500 w-4 h-4 mt-1" />
+                      <div class="flex-1">
+                        <div class="text-sm font-semibold flex items-center gap-2">Use Keyfile (2FA)<span class="px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 text-[10px]">ADVANCED</span></div>
+                        <div class="text-xs text-gray-500 mb-2">Adds an additional layer of security - you'll need both password and keyfile to decrypt</div>
+                        <input id="enc-keyfile" type="file" class="hidden" />
+                        <button id="enc-keyfile-btn" class="hidden text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition border border-white/10">Choose Keyfile</button>
+                        <p id="enc-keyfile-name" class="hidden text-xs text-green-400 mt-1"></p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex gap-3">
+                <button id="enc-btn" class="btn-hover flex-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl px-6 py-4 font-bold text-white text-lg shadow-lg">
+                  <div class="relative z-10 flex items-center justify-center gap-2"><i data-lucide="lock" class="w-5 h-5"></i><span>Encrypt & Download</span></div>
+                </button>
+              </div>
+
+              <div id="enc-progress-section" class="hidden mt-6 space-y-3">
+                <div class="flex items-center justify-between"><span class="text-sm font-semibold" id="enc-progress-text">Processing...</span><span class="text-sm text-gray-400" id="enc-progress-percent">0%</span></div>
+                <div class="h-2 w-full bg-white/10 rounded-full overflow-hidden"><div id="enc-progress-bar" class="h-full w-0 progress-bar transition-all duration-300"></div></div>
+                <p id="enc-progress-details" class="text-xs text-gray-400"></p>
+              </div>
+
+              <div id="enc-share-card" class="hidden mt-6 glass rounded-xl p-5">
+                <h4 class="text-sm font-bold mb-3 flex items-center gap-2"><i data-lucide="share-2" class="w-4 h-4 text-green-400"></i>Encryption Header (Safe to Share)</h4>
+                <pre id="enc-share-json" class="text-xs bg-black/40 rounded-lg p-3 overflow-auto mb-3"></pre>
+                <div class="flex gap-2">
+                  <button id="enc-qr-btn" class="btn-hover flex-1 bg-white/5 hover:bg-white/10 rounded-lg px-4 py-2 text-sm border border-white/10"><div class="relative z-10 flex items-center justify-center gap-2"><i data-lucide="qr-code" class="w-4 h-4"></i><span>Show QR</span></div></button>
+                  <button id="enc-download-qr" class="btn-hover flex-1 bg-white/5 hover:bg-white/10 rounded-lg px-4 py-2 text-sm border border-white/10 hidden"><div class="relative z-10 flex items-center justify-center gap-2"><i data-lucide="download" class="w-4 h-4"></i><span>Download QR</span></div></button>
+                  <button id="enc-copy-header" class="btn-hover flex-1 bg-white/5 hover:bg-white/10 rounded-lg px-4 py-2 text-sm border border-white/10">" class="btn-hover flex-1 bg-white/5 hover:bg-white/10 rounded-lg px-4 py-2 text-sm border border-white/10"><div class="relative z-10 flex items-center justify-center gap-2"><i data-lucide="copy" class="w-4 h-4"></i><span>Copy Header</span></div></button>
+                </div>
+                <div id="enc-qr-container" class="hidden mt-3 p-4 rounded-lg bg-black/40 text-center"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Sidebar -->
+          <div class="space-y-6">
+            <div class="glass-strong rounded-3xl p-6">
+              <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i data-lucide="shield-check" class="w-5 h-5 text-green-400"></i>Security Status</h3>
+              <div class="space-y-4">
+                <div><div class="flex items-center justify-between mb-1"><span class="text-xs text-gray-400">Algorithm</span><span class="text-xs font-bold text-blue-400">AES-256-GCM</span></div><div class="h-1 w-full bg-white/5 rounded-full overflow-hidden"><div class="h-full w-full bg-gradient-to-r from-blue-500 to-purple-500"></div></div></div>
+                <div><div class="flex items-center justify-between mb-1"><span class="text-xs text-gray-400">Key Strength</span><span class="text-xs font-bold text-purple-400">256-bit</span></div><div class="h-1 w-full bg-white/5 rounded-full overflow-hidden"><div class="h-full w-full bg-gradient-to-r from-purple-500 to-pink-500"></div></div></div>
+                <div><div class="flex items-center justify-between mb-1"><span class="text-xs text-gray-400">KDF</span><span class="text-xs font-bold text-orange-400">PBKDF2-SHA-256</span></div><div class="h-1 w-full bg-white/5 rounded-full overflow-hidden"><div class="h-full w-full bg-gradient-to-r from-orange-500 to-yellow-500"></div></div></div>
+                <div><div class="flex items-center justify-between mb-1"><span class="text-xs text-gray-400">Authentication</span><span class="text-xs font-bold text-green-400">AEAD (AAD)</span></div><div class="h-1 w-full bg-white/5 rounded-full overflow-hidden"><div class="h-full w-full bg-gradient-to-r from-green-500 to-emerald-500"></div></div></div>
+              </div>
+            </div>
+
+            <!-- Decrypt Panel Card -->
+            <div class="glass-strong rounded-3xl p-6" id="decrypt-card">
+              <h3 class="text-lg font-bold mb-1 flex items-center gap-2"><i data-lucide="unlock" class="w-5 h-5 text-blue-300"></i>Quick Decrypt</h3>
+              <p class="text-xs text-gray-400 mb-4">Paste header JSON and choose the encrypted .sft3 file.</p>
+
+              <label class="text-xs font-semibold text-gray-400">Header JSON</label>
+              <textarea id="dec-header" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs h-28 mt-1" placeholder='{"version":"1","alg":"AES-256-GCM", ...}'></textarea>
+
+              <div class="mt-3">
+                <label class="text-xs font-semibold text-gray-400">Encrypted File (.sft3)</label>
+                <input id="dec-file" type="file" accept=".sft3,.enc,.bin" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs mt-1" />
+              </div>
+
+              <div class="mt-3">
+                <label class="text-xs font-semibold text-gray-400">Password</label>
+                <input id="dec-pass" type="password" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm mt-1" />
+              </div>
+
+              <div class="mt-3 flex items-start gap-3">
+                <input type="checkbox" id="dec-use-keyfile" class="accent-orange-500 w-4 h-4 mt-1" />
+                <div class="flex-1">
+                  <div class="text-sm font-semibold">Use Keyfile</div>
+                  <input id="dec-keyfile" type="file" class="hidden" />
+                  <button id="dec-keyfile-btn" class="mt-1 text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition border border-white/10">Choose Keyfile</button>
+                  <p id="dec-keyfile-name" class="hidden text-xs text-green-400 mt-1"></p>
+                </div>
+              </div>
+
+              <button id="dec-btn" class="mt-4 btn-hover w-full bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl px-6 py-3 font-bold text-white text-sm shadow-lg flex items-center justify-center gap-2"><i data-lucide="download" class="w-4 h-4"></i><span>Decrypt & Save</span></button>
+
+              <div id="dec-progress-section" class="hidden mt-4 space-y-2">
+                <div class="flex items-center justify-between text-xs"><span id="dec-progress-text" class="font-semibold">Preparing...</span><span id="dec-progress-percent" class="text-gray-400">0%</span></div>
+                <div class="h-2 w-full bg-white/10 rounded-full overflow-hidden"><div id="dec-progress-bar" class="h-full w-0 progress-bar transition-all duration-300"></div></div>
+                <p id="dec-progress-details" class="text-[11px] text-gray-400"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Decrypt Screen (full) -->
+      <section id="panel-decrypt" class="hidden fade-in">
+        <div class="grid lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 space-y-6">
+            <div class="glass-strong rounded-3xl p-8">
+              <h2 class="text-2xl font-bold mb-2 flex items-center gap-2"><i data-lucide="unlock" class="w-6 h-6 text-green-400"></i>Decrypt a File</h2>
+              <p class="text-sm text-gray-400 mb-6">Provide header JSON and the encrypted file. Password (and keyfile if used) must match.</p>
+
+              <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label class="text-xs font-semibold text-gray-400">Header JSON</label>
+                  <textarea id="dec2-header" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs h-40 mt-1" placeholder='{"version":"1","alg":"AES-256-GCM", ...}'></textarea>
+                </div>
+                <div>
+                  <label class="text-xs font-semibold text-gray-400">Encrypted File (.sft3)</label>
+                  <input id="dec2-file" type="file" accept=".sft3,.enc,.bin" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs mt-1" />
+
+                  <div class="mt-4">
+                    <label class="text-xs font-semibold text-gray-400">Password</label>
+                    <input id="dec2-pass" type="password" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm mt-1" />
+                  </div>
+
+                  <div class="mt-4 flex items-start gap-3">
+                    <input type="checkbox" id="dec2-use-keyfile" class="accent-orange-500 w-4 h-4 mt-1" />
+                    <div class="flex-1">
+                      <div class="text-sm font-semibold">Use Keyfile</div>
+                      <input id="dec2-keyfile" type="file" class="hidden" />
+                      <button id="dec2-keyfile-btn" class="mt-1 text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition border border-white/10">Choose Keyfile</button>
+                      <p id="dec2-keyfile-name" class="hidden text-xs text-green-400 mt-1"></p>
+                    </div>
+                  </div>
+
+                  <button id="dec2-btn" class="mt-4 btn-hover w-full bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl px-6 py-3 font-bold text-white text-sm shadow-lg flex items-center justify-center gap-2"><i data-lucide"download" class="w-4 h-4"></i><span>Decrypt & Save</span></button>
+
+                  <div id="dec2-progress-section" class="hidden mt-4 space-y-2">
+                    <div class="flex items-center justify-between text-xs"><span id="dec2-progress-text" class="font-semibold">Preparing...</span><span id="dec2-progress-percent" class="text-gray-400">0%</span></div>
+                    <div class="h-2 w-full bg-white/10 rounded-full overflow-hidden"><div id="dec2-progress-bar" class="h-full w-0 progress-bar transition-all duration-300"></div></div>
+                    <p id="dec2-progress-details" class="text-[11px] text-gray-400"></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-6 glass rounded-xl p-5">
+                <h4 class="text-sm font-bold mb-3 flex items-center gap-2"><i data-lucide="qr-code" class="w-4 h-4 text-blue-300"></i>Scan Header from QR</h4>
+                <div class="grid sm:grid-cols-2 gap-3">
+                  <button id="qr-scan-start" class="btn-hover bg-white/5 hover:bg-white/10 rounded-lg px-4 py-2 text-sm border border-white/10 flex items-center justify-center gap-2"><i data-lucide="camera" class="w-4 h-4"></i>Start Camera Scan</button>
+                  <button id="qr-scan-stop" class="btn-hover bg-white/5 hover:bg-white/10 rounded-lg px-4 py-2 text-sm border border-white/10 flex items-center justify-center gap-2"><i data-lucide="square" class="w-4 h-4"></i>Stop</button>
+                </div>
+                <div class="mt-3 hidden" id="qr-scan-area">
+                  <video id="qr-video" class="w-full rounded-lg border border-white/10"></video>
+                  <canvas id="qr-canvas" class="hidden"></canvas>
+                  <p class="text-xs text-gray-400 mt-2">When a QR is detected, the header will be filled automatically.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-6">
+            <div class="glass rounded-3xl p-6">
+              <h3 class="font-bold mb-2">Tips</h3>
+              <ul class="text-sm text-gray-400 list-disc pl-5 space-y-1">
+                <li>Keep the header JSON separate from the encrypted file for security-by-separation.</li>
+                <li>Use a long password (≥16 chars) + keyfile for sensitive data.</li>
+                <li>Save the header safely; without it, decryption will fail.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast-container" class="fixed top-5 right-5 space-y-2 z-50"></div>
+
+  <script>
+    // ---------- Utilities ----------
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+    const bytesToHex = (buf) => [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    const hexToBytes = (hex) => new Uint8Array(hex.match(/.{1,2}/g).map(h=>parseInt(h,16)));
+    const b64 = { enc: (buf)=> btoa(String.fromCharCode(...new Uint8Array(buf))), dec: (str)=> Uint8Array.from(atob(str), c=>c.charCodeAt(0)) };
+    const enc = new TextEncoder();
+    const dec = new TextDecoder();
+
+    const prettyBytes = (n)=>{
+      if (n < 1024) return `${n} B`;
+      const units = ['KB','MB','GB','TB'];
+      let u=-1; do { n/=1024; ++u; } while (n>=1024 && u<units.length-1);
+      return `${n.toFixed(2)} ${units[u]}`;
+    };
+
+    const toast = (msg, type='info')=>{
+      const id = 't'+Math.random().toString(36).slice(2);
+      const colors = { info:'white/10', success:'emerald-500/20', error:'rose-500/20', warn:'amber-500/20' };
+      const el = document.createElement('div');
+      el.id = id;
+      el.className = `toast glass px-4 py-3 rounded-xl text-sm border border-white/10 bg-${colors[type]||colors.info}`;
+      el.innerHTML = `<div class="flex items-center gap-2"><span>${msg}</span><button class="ml-2 px-2 py-0.5 text-xs bg-white/5 rounded-lg">Close</button></div>`;
+      $('#toast-container').appendChild(el);
+      el.querySelector('button').onclick = ()=> el.remove();
+      setTimeout(()=> { el.remove(); }, 5000);
+    };
+
+    const updateProgress = (scope, pct, text, details='')=>{
+      const bar = document.getElementById(`${scope}-progress-bar`);
+      const ptxt = document.getElementById(`${scope}-progress-percent`);
+      const ttxt = document.getElementById(`${scope}-progress-text`);
+      const dd = document.getElementById(`${scope}-progress-details`);
+      if (bar) bar.style.width = `${pct}%`;
+      if (ptxt) ptxt.textContent = `${pct}%`;
+      if (ttxt) ttxt.textContent = text;
+      if (dd) dd.textContent = details;
+    };
+
+    // Entropy + strength
+    const categoryPool = (pwd)=>{
+      let pool = 0;
+      if (/[a-z]/.test(pwd)) pool += 26;
+      if (/[A-Z]/.test(pwd)) pool += 26;
+      if (/[0-9]/.test(pwd)) pool += 10;
+      if (/[^A-Za-z0-9]/.test(pwd)) pool += 33; // approx special set
+      return pool || 1;
+    };
+    const entropyBits = (pwd)=>{
+      const pool = categoryPool(pwd);
+      return Math.max(0, Math.log2(pool) * pwd.length);
+    };
+
+    // ---------- WebCrypto helpers ----------
+    const importKeyPBKDF2 = async(passwordBytes)=> crypto.subtle.importKey(
+      'raw', passwordBytes, {name:'PBKDF2'}, false, ['deriveKey','deriveBits']
+    );
+
+    const deriveKey = async(passwordBytes, salt, iterations)=> crypto.subtle.deriveKey(
+      {name:'PBKDF2', salt, iterations, hash:'SHA-256'},
+      await importKeyPBKDF2(passwordBytes),
+      {name:'AES-GCM', length:256},
+      false,
+      ['encrypt','decrypt']
+    );
+
+    const sha256 = async (buf) => crypto.subtle.digest('SHA-256', buf);
+
+    // Combine password + optional keyfile into a single byte-sequence for KDF
+    const combineSecret = async(pwdStr, keyfileBytes)=>{
+      const pwdBytes = enc.encode(pwdStr);
+      if (!keyfileBytes) return pwdBytes;
+      // Use H(pwd || keyfile) as the KDF input to keep length bounded
+      const combo = new Uint8Array(pwdBytes.length + keyfileBytes.length);
+      combo.set(pwdBytes, 0); combo.set(new Uint8Array(keyfileBytes), pwdBytes.length);
+      return new Uint8Array(await sha256(combo.buffer));
+    };
+
+    // Optional Compression using CompressionStream API (Chromium/Edge/Opera)
+    const gzipCompress = async (u8) => {
+      if (!('CompressionStream' in window)) return { ok:false, data:u8 };
+      const cs = new CompressionStream('gzip');
+      const writer = cs.writable.getWriter();
+      writer.write(u8);
+      await writer.close();
+      const out = await new Response(cs.readable).arrayBuffer();
+      return { ok:true, data:new Uint8Array(out) };
+    };
+
+    const gzipDecompress = async (u8) => {
+      if (!('DecompressionStream' in window)) return { ok:false, data:u8 };
+      const ds = new DecompressionStream('gzip');
+      const writer = ds.writable.getWriter();
+      writer.write(u8);
+      await writer.close();
+      const out = await new Response(ds.readable).arrayBuffer();
+      return { ok:true, data:new Uint8Array(out) };
+    };
+
+    // ---------- UI Elements ----------
+    const encEls = {
+      drop: $('#enc-drop'), file: $('#enc-file'), info: $('#enc-file-info'),
+      fname: $('#enc-file-name'), fsize: $('#enc-file-size'), ftype: $('#enc-file-type'), remove: $('#enc-remove-file'),
+      pass: $('#enc-pass'), passConfirm: $('#enc-pass-confirm'), passToggle: $('#enc-toggle-pass'),
+      strengthBar: $('#enc-strength-bar'), strengthText: $('#enc-strength-text'),
+      lengthCheck: $('#length-check'), upperCheck: $('#upper-check'), numberCheck: $('#number-check'), specialCheck: $('#special-check'),
+      entropyScore: $('#entropy-score'), entropyVisual: $('#entropy-visual'),
+      iters: $('#enc-iters'), itersDisplay: $('#enc-iters-display'),
+      compress: $('#enc-compress'), metadata: $('#enc-metadata'),
+      useKeyfile: $('#enc-use-keyfile'), keyfileBtn: $('#enc-keyfile-btn'), keyfileInput: $('#enc-keyfile'), keyfileName: $('#enc-keyfile-name'),
+      btn: $('#enc-btn'),
+      progressSection: $('#enc-progress-section'),
+      shareCard: $('#enc-share-card'), shareJSON: $('#enc-share-json'), qrBtn: $('#enc-qr-btn'), copyHeader: $('#enc-copy-header'), qrContainer: $('#enc-qr-container'),
+      matchIndicator: $('#enc-match-indicator')
+    };
+
+    const decEls = {
+      header: $('#dec-header'), file: $('#dec-file'), pass: $('#dec-pass'),
+      useKeyfile: $('#dec-use-keyfile'), keyfileBtn: $('#dec-keyfile-btn'), keyfileInput: $('#dec-keyfile'), keyfileName: $('#dec-keyfile-name'),
+      btn: $('#dec-btn'), progressSection: $('#dec-progress-section')
+    };
+
+    const dec2Els = {
+      header: $('#dec2-header'), file: $('#dec2-file'), pass: $('#dec2-pass'),
+      useKeyfile: $('#dec2-use-keyfile'), keyfileBtn: $('#dec2-keyfile-btn'), keyfileInput: $('#dec2-keyfile'), keyfileName: $('#dec2-keyfile-name'),
+      btn: $('#dec2-btn'), progressSection: $('#dec2-progress-section')
+    };
+
+    // Tabs
+    const tabEncrypt = $('#tab-encrypt');
+    const tabDecrypt = $('#tab-decrypt');
+    const panelEncrypt = $('#panel-encrypt');
+    const panelDecrypt = $('#panel-decrypt');
+
+    const switchTab = (to) => {
+      if (to === 'encrypt') {
+        tabEncrypt.classList.add('active'); tabDecrypt.classList.remove('active');
+        panelEncrypt.classList.remove('hidden'); panelDecrypt.classList.add('hidden');
+      } else {
+        tabDecrypt.classList.add('active'); tabEncrypt.classList.remove('active');
+        panelDecrypt.classList.remove('hidden'); panelEncrypt.classList.add('hidden');
+      }
+      lucide.createIcons();
+    };
+
+    tabEncrypt.addEventListener('click', ()=> switchTab('encrypt'));
+    tabDecrypt.addEventListener('click', ()=> switchTab('decrypt'));
+
+    // -------- Password UX --------
+    const refreshStrength = ()=>{
+      const pwd = encEls.pass.value || '';
+      const lengthOK = pwd.length >= 12;
+      const upperOK = /[A-Z]/.test(pwd) && /[a-z]/.test(pwd);
+      const numOK = /[0-9]/.test(pwd);
+      const specOK = /[^A-Za-z0-9]/.test(pwd);
+      const score = [lengthOK, upperOK, numOK, specOK].filter(Boolean).length;
+      encEls.strengthBar.className = 'strength-indicator strength-' + score;
+      const labels = ['Very Weak','Weak','Fair','Strong','Excellent'];
+      const colors = ['text-red-400','text-orange-400','text-yellow-400','text-green-400','text-emerald-400'];
+      encEls.strengthText.textContent = labels[score];
+      encEls.strengthText.className = 'text-xs font-bold ' + colors[score];
+      encEls.lengthCheck.setAttribute('data-lucide', lengthOK?'check':'x');
+      encEls.upperCheck.setAttribute('data-lucide', upperOK?'check':'x');
+      encEls.numberCheck.setAttribute('data-lucide', numOK?'check':'x');
+      encEls.specialCheck.setAttribute('data-lucide', specOK?'check':'x');
+      lucide.createIcons();
+      // Entropy
+      const bits = entropyBits(pwd);
+      encEls.entropyScore.textContent = bits.toFixed(1) + ' bits';
+      const dots = Math.min(64, Math.round(bits/2));
+      encEls.entropyVisual.innerHTML = '';
+      for (let i=0; i<64; i++){
+        const d = document.createElement('span');
+        d.className = 'entropy-dot ' + (i<dots ? 'bg-purple-400' : 'bg-white/10');
+        encEls.entropyVisual.appendChild(d);
+      }
+      // Match indicator
+      const match = encEls.passConfirm.value && (encEls.passConfirm.value === pwd);
+      const mi = encEls.matchIndicator;
+      if (encEls.passConfirm.value.length){
+        mi.classList.remove('hidden');
+        mi.textContent = match ? 'Passwords match' : 'Passwords do not match';
+        mi.className = 'text-xs mt-2 ' + (match ? 'text-green-400' : 'text-red-400');
+      } else { mi.classList.add('hidden'); }
+    };
+
+    encEls.pass.addEventListener('input', refreshStrength);
+    encEls.passConfirm.addEventListener('input', refreshStrength);
+    encEls.passToggle.addEventListener('click', ()=>{
+      encEls.pass.type = encEls.pass.type === 'password' ? 'text' : 'password';
+      lucide.createIcons();
+    });
+
+    // Iterations
+    encEls.iters.addEventListener('input', ()=>{
+      encEls.itersDisplay.textContent = Number(encEls.iters.value).toLocaleString();
+    });
+
+    // Keyfile toggles
+    encEls.useKeyfile.addEventListener('change', ()=>{
+      const on = encEls.useKeyfile.checked;
+      encEls.keyfileBtn.classList.toggle('hidden', !on);
+      encEls.keyfileName.classList.toggle('hidden', true);
+      if (!on) encEls.keyfileInput.value = '';
+    });
+    encEls.keyfileBtn.addEventListener('click', ()=> encEls.keyfileInput.click());
+    encEls.keyfileInput.addEventListener('change', ()=>{
+      const f = encEls.keyfileInput.files[0];
+      if (!f) return;
+      encEls.keyfileName.textContent = `Selected: ${f.name} (${prettyBytes(f.size)})`;
+      encEls.keyfileName.classList.remove('hidden');
+    });
+
+    // Encrypt file selection + DnD
+    let encSelectedFile = null;
+    const showEncFile = (f)=>{
+      encSelectedFile = f;
+      encEls.info.classList.remove('hidden');
+      encEls.fname.textContent = f.name;
+      encEls.fsize.textContent = prettyBytes(f.size);
+      encEls.ftype.textContent = (f.type || 'binary').toUpperCase();
+    };
+
+    encEls.drop.addEventListener('click', ()=> encEls.file.click());
+    encEls.file.addEventListener('change', ()=>{ const f = encEls.file.files[0]; if (f) showEncFile(f); });
+    encEls.drop.addEventListener('dragover', (e)=>{ e.preventDefault(); encEls.drop.classList.add('dragover'); });
+    encEls.drop.addEventListener('dragleave', ()=> encEls.drop.classList.remove('dragover'));
+    encEls.drop.addEventListener('drop', (e)=>{ e.preventDefault(); encEls.drop.classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f) showEncFile(f); });
+    encEls.remove.addEventListener('click', ()=>{ encSelectedFile = null; encEls.file.value=''; encEls.info.classList.add('hidden'); });
+
+    // --------- Encryption flow ---------
+    const encryptFlow = async()=>{
+      try {
+        if (!encSelectedFile) return toast('Please choose a file to encrypt', 'warn');
+        const pwd = encEls.pass.value || '';
+        if (pwd.length < 12) return toast('Use at least 12 characters for the password', 'warn');
+        if (pwd !== encEls.passConfirm.value) return toast('Passwords do not match', 'error');
+
+        const iterations = Number(encEls.iters.value);
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+
+        const keyfileBytes = encEls.useKeyfile.checked ? await encEls.keyfileInput.files[0]?.arrayBuffer() : null;
+        if (encEls.useKeyfile.checked && !keyfileBytes) return toast('Keyfile enabled but not selected', 'warn');
+
+        encEls.progressSection.classList.remove('hidden');
+        updateProgress('enc', 5, 'Reading file…');
+        const fileBytes = new Uint8Array(await encSelectedFile.arrayBuffer());
+
+        let dataBytes = fileBytes;
+        let compressed = false;
+        if (encEls.compress.checked) {
+          if (!('CompressionStream' in window)) {
+            toast('Compression is not supported in this browser. Encrypting without compression.', 'warn');
+            dataBytes = fileBytes;
+            compressed = false;
+          } else {
+            updateProgress('enc', 10, 'Compressing…');
+            const gz = await gzipCompress(fileBytes);
+            dataBytes = gz.data;
+            compressed = true;
+          }
+        } else {
+          dataBytes = fileBytes;
+          compressed = false;
+        }
+
+        updateProgress('enc', 25, 'Deriving key…');
+        const combined = await combineSecret(pwd, keyfileBytes);
+        const key = await deriveKey(combined, salt, iterations);
+
+        const meta = encEls.metadata.checked ? {
+          originalName: encSelectedFile.name,
+          originalType: encSelectedFile.type || 'application/octet-stream',
+          originalSize: encSelectedFile.size
+        } : undefined;
+
+        const header = {
+          version: 1,
+          alg: 'AES-256-GCM',
+          kdf: 'PBKDF2-SHA-256',
+          iterations,
+          salt: b64.enc(salt),
+          iv: b64.enc(iv),
+          compressed,
+          createdAt: new Date().toISOString(),
+          metadata: meta
+        };
+
+        const aad = enc.encode(JSON.stringify({ version: header.version, alg: header.alg, kdf: header.kdf, iterations: header.iterations, salt: header.salt, iv: header.iv, compressed: header.compressed }));
+
+        updateProgress('enc', 45, 'Encrypting…');
+        const ciphertext = await crypto.subtle.encrypt({ name:'AES-GCM', iv, additionalData: aad, tagLength: 128 }, key, dataBytes);
+
+        updateProgress('enc', 85, 'Preparing download…');
+        const outBlob = new Blob([new Uint8Array(ciphertext)], { type: 'application/octet-stream' });
+        const dlName = (encSelectedFile.name || 'file') + '.sft3';
+        const url = URL.createObjectURL(outBlob);
+        const a = document.createElement('a'); a.href = url; a.download = dlName; a.click(); URL.revokeObjectURL(url);
+
+        updateProgress('enc', 100, 'Done', `Encrypted size: ${prettyBytes(outBlob.size)}`);
+        encEls.shareCard.classList.remove('hidden');
+        encEls.shareJSON.textContent = JSON.stringify(header, null, 2);
+        // === Auto Generate QR After Encryption ===
+encEls.qrContainer.classList.remove('hidden');
+encEls.qrContainer.innerHTML = '';
+
+const headerQRData = JSON.stringify(header); // encode full header
+const qr = new QRCode(encEls.qrContainer, {
+  text: headerQRData,
+  width: 220,
+  height: 220,
+  correctLevel: QRCode.CorrectLevel.M
+});
+
+// Enable Download Button
+const downloadBtn = $('#enc-download-qr');
+downloadBtn.classList.remove('hidden');
+
+downloadBtn.onclick = () => {
+  let img = encEls.qrContainer.querySelector('img') || encEls.qrContainer.querySelector('canvas');
+  if (!img) return;
+
+  // Convert to canvas to ensure PNG download
+  const canvas = document.createElement('canvas');
+  canvas.width = img.width;
+  canvas.height = img.height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+
+  const pngURL = canvas.toDataURL("image/png");
+  const link = document.createElement('a');
+  link.href = pngURL;
+  link.download = (encSelectedFile.name || 'file') + '_header_qr.png';
+  link.click();
+};
+
+        toast('Encryption complete. Save the header JSON safely!', 'success');
+      } catch (e){
+        console.error(e); toast('Encryption failed: ' + (e.message||e), 'error');
+        updateProgress('enc', 0, 'Error');
+      }
+    };
+
+    encEls.btn.addEventListener('click', encryptFlow);
+
+    // Header QR + copy
+    encEls.qrBtn.addEventListener('click', ()=>{
+      encEls.qrContainer.classList.remove('hidden');
+      encEls.qrContainer.innerHTML = '';
+      const smallHeader = JSON.parse(encEls.shareJSON.textContent||'{}');
+      delete smallHeader.metadata;
+      const qr = new QRCode(encEls.qrContainer, { text: JSON.stringify(smallHeader), width: 200, height: 200 });
+      const downloadBtn = document.getElementById('enc-download-qr');
+      downloadBtn.classList.remove('hidden');
+      downloadBtn.onclick = () => {
+        const img = encEls.qrContainer.querySelector('img') || encEls.qrContainer.querySelector('canvas');
+        if (!img) return;
+        const canvas = img.tagName === 'CANVAS' ? img : (()=>{const c=document.createElement('canvas');c.width=img.width;c.height=img.height;const ctx=c.getContext('2d');ctx.drawImage(img,0,0);return c;})();
+        const url = canvas.toDataURL('image/png');
+        const a = document.createElement('a'); a.href = url; a.download = 'encryption_header_qr.png'; a.click();
+      };
+    });
+    encEls.copyHeader.addEventListener('click', async()=>{
+      try { await navigator.clipboard.writeText(encEls.shareJSON.textContent); toast('Header copied to clipboard', 'success'); }
+      catch{ toast('Copy failed', 'error'); }
+    });
+
+    // ---------- Decryption flow (Quick card + Full panel share logic) ----------
+    const performDecrypt = async (els, scope) => {
+      try {
+        const headerText = els.header.value.trim();
+        if (!headerText) return toast('Paste the header JSON first', 'warn');
+        let header; try { header = JSON.parse(headerText); } catch { return toast('Invalid header JSON', 'error'); }
+        const file = els.file.files[0];
+        if (!file) return toast('Select the encrypted .sft3 file', 'warn');
+        const pwd = els.pass.value || '';
+        if (!pwd) return toast('Enter the password', 'warn');
+        const keyfileBytes = els.useKeyfile.checked ? await els.keyfileInput.files[0]?.arrayBuffer() : null;
+        if (els.useKeyfile.checked && !keyfileBytes) return toast('Keyfile enabled but not selected', 'warn');
+
+        document.getElementById(`${scope}-progress-section`).classList.remove('hidden');
+        updateProgress(scope, 10, 'Reading encrypted data…');
+        const cipherBytes = new Uint8Array(await file.arrayBuffer());
+
+        const salt = b64.dec(header.salt);
+        const iv = b64.dec(header.iv);
+        const iterations = Number(header.iterations);
+        const aad = enc.encode(JSON.stringify({ version: header.version, alg: header.alg, kdf: header.kdf, iterations: header.iterations, salt: header.salt, iv: header.iv, compressed: header.compressed }));
+
+        updateProgress(scope, 30, 'Deriving key…');
+        const combined = await combineSecret(pwd, keyfileBytes);
+        const key = await deriveKey(combined, salt, iterations);
+
+        updateProgress(scope, 55, 'Decrypting…');
+        const plainBuf = await crypto.subtle.decrypt({ name:'AES-GCM', iv, additionalData: aad, tagLength: 128 }, key, cipherBytes);
+        let outBytes = new Uint8Array(plainBuf);
+
+        if (header.compressed){
+          updateProgress(scope, 75, 'Decompressing…');
+          const dz = await gzipDecompress(outBytes);
+          if (!dz.ok) toast('Decompression not supported here. The output will be the compressed data.', 'warn');
+          outBytes = dz.data;
+        }
+
+        updateProgress(scope, 90, 'Saving…');
+        const outBlob = new Blob([outBytes], { type: header.metadata?.originalType || 'application/octet-stream' });
+        const name = header.metadata?.originalName || (file.name.replace(/\.sft3$/,'') + '.dec');
+        const url = URL.createObjectURL(outBlob);
+        const a = document.createElement('a'); a.href = url; a.download = name; a.click(); URL.revokeObjectURL(url);
+
+        updateProgress(scope, 100, 'Done', `Decrypted size: ${prettyBytes(outBlob.size)}`);
+        toast('Decryption complete', 'success');
+      } catch (e){
+        console.error(e); toast('Decryption failed: ' + (e.message||e), 'error');
+        updateProgress(scope, 0, 'Error');
+      }
+    };
+
+    // Quick decrypt card
+    decEls.useKeyfile.addEventListener('change', ()=>{
+      const on = decEls.useKeyfile.checked; decEls.keyfileBtn.classList.toggle('hidden', !on); if (!on) decEls.keyfileName.classList.add('hidden');
+    });
+    decEls.keyfileBtn.addEventListener('click', ()=> decEls.keyfileInput.click());
+    decEls.keyfileInput.addEventListener('change', ()=>{
+      const f = decEls.keyfileInput.files[0]; if (!f) return; decEls.keyfileName.textContent = `Selected: ${f.name} (${prettyBytes(f.size)})`; decEls.keyfileName.classList.remove('hidden');
+    });
+    decEls.btn.addEventListener('click', ()=> performDecrypt({ header: decEls.header, file: decEls.file, pass: decEls.pass, useKeyfile: decEls.useKeyfile, keyfileInput: decEls.keyfileInput }, 'dec'));
+
+    // Full decrypt panel
+    dec2Els.useKeyfile.addEventListener('change', ()=>{
+      const on = dec2Els.useKeyfile.checked; dec2Els.keyfileBtn.classList.toggle('hidden', !on); if (!on) dec2Els.keyfileName.classList.add('hidden');
+    });
+    dec2Els.keyfileBtn.addEventListener('click', ()=> dec2Els.keyfileInput.click());
+    dec2Els.keyfileInput.addEventListener('change', ()=>{
+      const f = dec2Els.keyfileInput.files[0]; if (!f) return; dec2Els.keyfileName.textContent = `Selected: ${f.name} (${prettyBytes(f.size)})`; dec2Els.keyfileName.classList.remove('hidden');
+    });
+    dec2Els.btn.addEventListener('click', ()=> performDecrypt({ header: dec2Els.header, file: dec2Els.file, pass: dec2Els.pass, useKeyfile: dec2Els.useKeyfile, keyfileInput: dec2Els.keyfileInput }, 'dec2'));
+
+    // QR scanner in full decrypt
+    let qrStream = null, qrRAF = null;
+    const qrArea = $('#qr-scan-area');
+    const qrVideo = $('#qr-video');
+    const qrCanvas = $('#qr-canvas');
+
+    const scanLoop = ()=>{
+      if (!qrStream) return;
+      const w = qrVideo.videoWidth, h = qrVideo.videoHeight;
+      if (w && h){
+        qrCanvas.width = w; qrCanvas.height = h;
+        const ctx = qrCanvas.getContext('2d');
+        ctx.drawImage(qrVideo, 0, 0, w, h);
+        const img = ctx.getImageData(0, 0, w, h);
+        const code = jsQR(img.data, w, h);
+        if (code && code.data){ dec2Els.header.value = code.data; toast('QR header captured', 'success'); stopQR(); return; }
+      }
+      qrRAF = requestAnimationFrame(scanLoop);
+    };
+
+    const startQR = async()=>{
+      try {
+        qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        qrVideo.srcObject = qrStream; qrVideo.setAttribute('playsinline','true'); await qrVideo.play();
+        qrArea.classList.remove('hidden');
+        scanLoop();
+      } catch (e){ toast('Camera access denied or not available', 'error'); }
+    };
+    const stopQR = ()=>{
+      if (qrRAF) cancelAnimationFrame(qrRAF); qrRAF = null;
+      if (qrStream){ qrStream.getTracks().forEach(t=>t.stop()); qrStream = null; }
+      qrArea.classList.add('hidden');
+    };
+
+    $('#qr-scan-start').addEventListener('click', startQR);
+    $('#qr-scan-stop').addEventListener('click', stopQR);
+
+    // ---------- Init ----------
+    window.addEventListener('load', ()=>{
+      lucide.createIcons();
+      refreshStrength();
+    });
+  </script>
+</body>
+</html>
+
