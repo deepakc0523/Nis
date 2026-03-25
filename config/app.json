@@ -6,7 +6,7 @@
     "password": "supersecret123"
   },
   "logging": {
-    "level": "info",
+    "level": "debug",
     "debug": false
   },
   "server": {
